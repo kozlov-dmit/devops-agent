@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Optional
+from typing import Iterable, List
 
 from .chunking import Chunk, chunk_text_by_lines
 from .config import ChunkingConfig, IndexConfig
@@ -23,12 +22,27 @@ CODE_EXT = {
     ".tpl": "helm",
 }
 
-
-EXCLUDED_DIRS = {".git", "target", "build", ".idea", ".gradle", ".mvn", "node_modules"}
+EXCLUDED_DIRS = {
+    ".git", "target", "build", ".idea", ".gradle", ".mvn", "node_modules",
+    ".classpath", ".project", ".settings"
+}
 
 
 def _is_excluded(path: Path) -> bool:
-    return any(part in EXCLUDED_DIRS for part in path.parts)
+    # directory exclusion
+    if any(part in EXCLUDED_DIRS for part in path.parts):
+        return True
+
+    # exclude tests by path
+    rel = "/".join(path.parts).lower()
+    if "/src/test/" in rel:
+        return True
+
+    # exclude typical generated folders
+    if "/generated/" in rel or "/gen/" in rel:
+        return True
+
+    return False
 
 
 def iter_repo_files(repo_root: Path) -> Iterable[Path]:
@@ -38,13 +52,16 @@ def iter_repo_files(repo_root: Path) -> Iterable[Path]:
         if _is_excluded(p):
             continue
         if p.suffix.lower() in CODE_EXT:
+            # Exclude test naming patterns as an extra guard
+            name = p.name.lower()
+            if name.endswith("test.java") or name.endswith("tests.java") or name.endswith("it.java"):
+                continue
             yield p
 
 
 def _matches_prefixes(rel_path: str, prefixes: tuple[str, ...]) -> bool:
     if not prefixes:
         return True
-    # Нормализуем на “/”
     rel = rel_path.replace("\\", "/")
     return any(rel.startswith(pref) for pref in prefixes)
 
@@ -68,7 +85,7 @@ def build_chunks(
         except Exception:
             continue
 
-        # Быстрая эвристика “текстовый файл”: отсечь нули
+        # simple binary detection
         if b"\x00" in raw[:4096]:
             continue
 

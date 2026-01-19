@@ -10,7 +10,7 @@
     "kafka_lag": 0
   },
   "logs": [
-    "TimeoutException: Read timed out calling https://downstream/api/v1/confirm",
+    "TimeoutException: Read timed out calling",
     "HikariPool-1 - Connection is not available, request timed out after 30000ms",
     "org.postgresql.util.PSQLException: ERROR: canceling statement due to statement timeout",
     "at com.acme.payments.service.PaymentService.confirm(PaymentService.java:143)",
