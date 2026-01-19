@@ -1,0 +1,13 @@
+{
+  "repo_root": "C:\\DEVELOP\\github\\istio-visual",
+  "commit_sha": null,
+  "embed_model": "intfloat/multilingual-e5-base",
+  "embed_device": "cpu",
+  "embed_batch_size": 32,
+  "embed_e5_prefix": true,
+  "chunk_max_lines": 120,
+  "chunk_overlap": 20,
+  "created_at": "2026-01-19T09:50:54.253923+00:00",
+  "dim": 768,
+  "chunks": 85
+}
